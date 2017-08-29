@@ -50,6 +50,7 @@ NSString *const ATLMLayerControllerErrorDomain = @"ATLMLayerControllerErrorDomai
     self = [super init];
     if (self) {
         _layerClient = [LYRClient clientWithAppID:layerAppID delegate:self options:clientOptions];
+        _layerClient.debuggingEnabled = YES;
         _layerClient.autodownloadMIMETypes = [NSSet setWithObjects:ATLMIMETypeImageJPEGPreview, ATLMIMETypeTextPlain, nil];
         _authenticationProvider = authenticationProvider;
     }
@@ -80,6 +81,33 @@ NSString *const ATLMLayerControllerErrorDomain = @"ATLMLayerControllerErrorDomai
                     completion(nil, error);
                 }
             }];
+        }];
+    }];
+}
+
+- (void)refreshAuthentication
+{
+    [self.layerClient requestAuthenticationNonceWithCompletion:^(NSString * _Nullable nonce, NSError * _Nullable error) {
+        [self refreshAuthenticationWithNonce:nonce];
+    }];
+}
+
+- (void)refreshAuthenticationWithNonce:(NSString *)nonce
+{
+    NSLog(@"Layer Client will refresh authentication with nonce=%@", nonce);
+    [self.authenticationProvider refreshAuthenticationWithNonce:nonce completion:^(NSString * _Nonnull identityToken, NSError * _Nonnull error) {
+        if (!identityToken) {
+            [self notifyDelegateOfError:error];
+            return;
+        }
+        NSLog(@"Authentication refreshed with identityToken=%@", identityToken);
+        // Pass the new identity token to the client to reestablish the session.
+        [self.layerClient authenticateWithIdentityToken:identityToken completion:^(LYRIdentity * _Nullable authenticatedUser, NSError * _Nullable error) {
+            if (!authenticatedUser) {
+                [self notifyDelegateOfError:error];
+            } else {
+                NSLog(@"Layer Client did authenticate as authenticatedUser=%@", authenticatedUser);
+            }
         }];
     }];
 }
@@ -127,18 +155,7 @@ NSString *const ATLMLayerControllerErrorDomain = @"ATLMLayerControllerErrorDomai
 - (void)layerClient:(LYRClient *)client didReceiveAuthenticationChallengeWithNonce:(NSString *)nonce
 {
     NSLog(@"Layer Client did receive an authentication challenge with nonce=%@", nonce);
-    [self.authenticationProvider refreshAuthenticationWithNonce:nonce completion:^(NSString * _Nonnull identityToken, NSError * _Nonnull error) {
-        if (!identityToken) {
-            [self notifyDelegateOfError:error];
-            return;
-        }
-        // Pass the new identity token to the client to reestablish the session.
-        [self.layerClient authenticateWithIdentityToken:identityToken completion:^(LYRIdentity * _Nullable authenticatedUser, NSError * _Nullable error) {
-            if (!authenticatedUser) {
-                [self notifyDelegateOfError:error];
-            }
-        }];
-    }];
+    [self refreshAuthenticationWithNonce:nonce];
 }
 
 - (void)layerClient:(LYRClient *)client didAuthenticateAsUserID:(NSString *)userID
@@ -229,18 +246,6 @@ NSString *const ATLMLayerControllerErrorDomain = @"ATLMLayerControllerErrorDomai
     query.predicate = [LYRPredicate predicateWithProperty:@"participants" predicateOperator:LYRPredicateOperatorIsEqualTo value:participants];
     query.limit = 1;
     return [self.layerClient executeQuery:query error:nil].firstObject;
-}
-
-#pragma mark - Notification Handlers
-
-- (void)didReceiveLayerClientWillBeginSynchronizationNotification:(NSNotification *)notification
-{
-    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
-}
-
-- (void)didReceiveLayerClientDidFinishSynchronizationNotification:(NSNotification *)notification
-{
-    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 }
 
 @end

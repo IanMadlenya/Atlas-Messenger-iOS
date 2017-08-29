@@ -1,5 +1,19 @@
 # Atlas Messenger Changelog
 
+## 1.2.0
+
+### Enhancements
+
+* Refactored the authentication flow to better handle race conditions between connecting and authenticating that could leave the app in a `Challenged` state.
+
+## 1.1.2
+
+### Enhancements
+
+* LayerKitDiagnostics is now included in Atlas Messenger. The Settings view contains a button to capture a debug snapshot and send it to support@layer.com for troubleshooting.
+* Removed the `Done` button in the Settings view, which didn't do anything significant and duplicated functionality of the default `Back` button.
+* Added an error message if login credentials are invalid and the identity token is `nil`.
+
 ## 1.1.1
 
 ### Enhancements

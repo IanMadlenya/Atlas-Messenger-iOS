@@ -97,6 +97,11 @@ typedef NS_ENUM(NSUInteger, ATLMLayerControllerError) {
 - (void)authenticateWithCredentials:(nonnull ATLMUserCredentials *)credentials completion:(nonnull void (^)(LYRSession * _Nonnull session, NSError *_Nullable error))completion;
 
 /**
+ @abstract Refreshes the current authentication by performing the Layer authentication handshake.
+ */
+- (void)refreshAuthentication;
+
+/**
  @abstract Updates the remote notification device token on the underlying `LYRClient` insance.
  @param deviceToken The remote notification device token passed by the app delegate
    upon receiving a device token.

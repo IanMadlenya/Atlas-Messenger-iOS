@@ -238,6 +238,8 @@ static void *ATLMApplicationViewControllerObservationContext = &ATLMApplicationV
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleLayerClientDidLoseConnectionNotification:) name:LYRClientDidLoseConnectionNotification object:layerController.layerClient];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleLayerClientDidAuthenticateNotification:) name:LYRClientDidAuthenticateNotification object:layerController.layerClient];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleLayerClientDidDeauthenticateNotification:) name:LYRClientDidDeauthenticateNotification object:layerController.layerClient];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleLayerClientWillBeginSynchronizationNotification:) name:LYRClientWillBeginSynchronizationNotification object:layerController.layerClient];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleLayerClientDidFinishSynchronizationNotification:) name:LYRClientDidFinishSynchronizationNotification object:layerController.layerClient];
         
         // Connect the client
         [layerController.layerClient connectWithCompletion:^(BOOL success, NSError * _Nullable error) {
@@ -271,6 +273,10 @@ static void *ATLMApplicationViewControllerObservationContext = &ATLMApplicationV
 {
     // Show HUD with message
     [SVProgressHUD showSuccessWithStatus:@"Connected to Layer"];
+    
+    if (self.layerController.layerClient.currentSession.state == LYRSessionStateChallenged) {
+        [self.layerController refreshAuthentication];
+    }
 }
 
 - (void)handleLayerClientDidDisconnectNotification:(NSNotification *)notification
@@ -293,6 +299,18 @@ static void *ATLMApplicationViewControllerObservationContext = &ATLMApplicationV
 - (void)handleLayerClientDidDeauthenticateNotification:(NSNotification *)notification
 {
     self.state = ATLMApplicationStateCredentialsRequired;
+}
+
+- (void)handleLayerClientWillBeginSynchronizationNotification:(NSNotification *)notification
+{
+    NSLog(@"layerClient will begin synchronization");
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+}
+
+- (void)handleLayerClientDidFinishSynchronizationNotification:(NSNotification *)notification
+{
+    NSLog(@"layerClient did finish synchronization");
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
 }
 
 #pragma mark - ATLMRegistrationViewControllerDelegate implementation
