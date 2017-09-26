@@ -28,7 +28,7 @@ CGFloat const ATLMLogoLeftPadding = 4;
     self = [super initWithFrame:frame];
     if (self) {
         
-        NSMutableAttributedString *atlasString = [[NSMutableAttributedString alloc] initWithString:@"ATLAS MESSENGER"];
+        NSMutableAttributedString *atlasString = [[NSMutableAttributedString alloc] initWithString:@"ATLAS\nMESSENGER"];
         [atlasString addAttribute:NSFontAttributeName value:ATLMUltraLightFont(26) range:NSMakeRange(0, atlasString.length)];
         [atlasString addAttribute:NSForegroundColorAttributeName value:ATLBlueColor() range:NSMakeRange(0, atlasString.length)];
         [atlasString addAttribute:NSKernAttributeName value:@(12.0) range:NSMakeRange(0, atlasString.length)];
@@ -36,6 +36,8 @@ CGFloat const ATLMLogoLeftPadding = 4;
         _atlasLabel = [[UILabel alloc] init];
         _atlasLabel.translatesAutoresizingMaskIntoConstraints = NO;
         _atlasLabel.attributedText = atlasString;
+        _atlasLabel.numberOfLines = 2;
+        _atlasLabel.textAlignment = NSTextAlignmentCenter;
         [_atlasLabel sizeToFit];
         [self addSubview:_atlasLabel];
         
@@ -46,6 +48,7 @@ CGFloat const ATLMLogoLeftPadding = 4;
         _poweredByLabel = [[UILabel alloc] init];
         _poweredByLabel.translatesAutoresizingMaskIntoConstraints = NO;
         _poweredByLabel.attributedText = attributedString;
+        _poweredByLabel.textAlignment = NSTextAlignmentCenter;
         [_poweredByLabel sizeToFit];
         [self addSubview:_poweredByLabel];
         
