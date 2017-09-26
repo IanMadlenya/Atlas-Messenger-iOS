@@ -191,39 +191,6 @@ static void *ATLMApplicationViewControllerObservationContext = &ATLMApplicationV
     [self presentViewController:self.registrationNavigationController animated:YES completion:nil];
 }
 
-#pragma mark - ATLMLayerControllerDelegate implementation
-
-- (void)applicationController:(ATLMLayerController *)applicationController didFinishHandlingRemoteNotificationForConversation:(LYRConversation *)conversation message:(LYRMessage *)message responseText:(nullable NSString *)responseText
-{
-    if (responseText.length) {
-        // Handle the inline message reply.
-        if (!conversation) {
-            NSLog(@"Failed to complete inline reply: unable to find Conversation referenced by remote notification.");
-            return;
-        }
-        LYRMessagePart *messagePart = [LYRMessagePart messagePartWithText:responseText];
-        NSString *fullName = self.layerController.layerClient.authenticatedUser.displayName;
-        NSString *pushText = [NSString stringWithFormat:@"%@: %@", fullName, responseText];
-        LYRMessage *message = ATLMessageForParts(self.layerController.layerClient, @[ messagePart ], pushText, ATLMPushNotificationSoundName);
-        if (message) {
-            NSError *error = nil;
-            BOOL success = [conversation sendMessage:message error:&error];
-            if (!success) {
-                NSLog(@"Failed to send inline reply: %@", [error localizedDescription]);
-            }
-        }
-        return;
-    }
-    
-    // Navigate to the conversation, after the remote notification's been handled.
-    BOOL userTappedRemoteNotification = [UIApplication sharedApplication].applicationState == UIApplicationStateInactive;
-    if (userTappedRemoteNotification && conversation) {
-        [self.conversationListViewController selectConversation:conversation];
-    } else if (userTappedRemoteNotification) {
-        [SVProgressHUD showWithStatus:@"Loading Conversation"];
-    }
-}
-
 - (void)setLayerController:(ATLMLayerController *)layerController
 {
     if (_layerController == layerController) {

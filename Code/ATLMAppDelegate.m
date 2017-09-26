@@ -160,4 +160,28 @@
     NSLog(@"Application controller=%@ has hit an error=%@", applicationController, error);
 }
 
+
+- (void)layerController:(nonnull ATLMLayerController *)applicationController didFinishHandlingRemoteNotificationForConversation:(nullable LYRConversation *)conversation message:(nullable LYRMessage *)message responseText:(nullable NSString *)responseText
+{
+    if (responseText.length) {
+        // Handle the inline message reply.
+        if (!conversation) {
+            NSLog(@"Failed to complete inline reply: unable to find Conversation referenced by remote notification.");
+            return;
+        }
+        LYRMessagePart *messagePart = [LYRMessagePart messagePartWithText:responseText];
+        NSString *fullName = self.layerController.layerClient.authenticatedUser.displayName;
+        NSString *pushText = [NSString stringWithFormat:@"%@: %@", fullName, responseText];
+        LYRMessage *message = ATLMessageForParts(self.layerController.layerClient, @[ messagePart ], pushText, @"chime.aiff");
+        if (message) {
+            NSError *error = nil;
+            BOOL success = [conversation sendMessage:message error:&error];
+            if (!success) {
+                NSLog(@"Failed to send inline reply: %@", [error localizedDescription]);
+            }
+        }
+        return;
+    }
+}
+
 @end
