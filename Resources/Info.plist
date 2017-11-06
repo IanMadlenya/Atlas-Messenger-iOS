@@ -52,11 +52,6 @@
 		<key>LYRBuildShortSha</key>
 		<string>e0a3b34</string>
 	</dict>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>The camera is used to collect a Layer App ID from a QR code.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
