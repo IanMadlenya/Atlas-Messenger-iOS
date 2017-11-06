@@ -1,5 +1,11 @@
 # Atlas Messenger Changelog
 
+## 1.2.1
+
+### Bug Fixes
+
+* Disallowing loads from any domain. The use of `NSAllowsArbitraryLoads` is discouraged for production builds.
+
 ## 1.2.0
 
 ### Enhancements
